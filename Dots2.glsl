@@ -14,7 +14,7 @@ vec2 rotate(vec2 p, float theta)
 float swirl(vec2 coord, float t)
 {
     float l = length(coord) / resolution.x;
-    float phi = atan(coord.y, coord.x);
+    float phi = atan(coord.y, coord.x + 1e-6);
     return sin(l * 10 + phi - t * 4) * 0.5 + 0.5;
 }
 

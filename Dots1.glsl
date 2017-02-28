@@ -8,7 +8,7 @@ out vec4 fragColor;
 float swirl(vec2 coord)
 {
     float l = length(coord) / resolution.x;
-    float phi = atan(coord.y, coord.x);
+    float phi = atan(coord.y, coord.x + 1e-6);
     return sin(l * 10 + phi - time * 4) * 0.5 + 0.5;
 }
 
@@ -21,8 +21,8 @@ float halftone(vec2 coord)
     vec2 odd = vec2(0.5 * mod(ip.y, 2), 0); // odd line offset
     vec2 cp = floor(uv - odd) + odd; // dot center
     float d = length(uv - cp - 0.5) * size; // distance
-    float r = swirl(cp * size) * size * 0.5; // dot radius
-    return clamp(d  - r, 0, 1);
+    float r = swirl(cp * size) * (size - 2) * 0.5; // dot radius
+    return clamp(d - r, 0, 1);
 }
 
 void main(void)

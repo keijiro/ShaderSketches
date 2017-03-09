@@ -8,20 +8,19 @@ out vec4 fragColor;
 float letter(vec2 coord)
 {
     float size = resolution.x / 25;
-    vec2 c_i = floor(coord / size);
-    vec2 c_f = fract(coord / size);
-    vec2 p_i = floor(c_f * 7);
 
-    vec2 c2 = fract(p_i * 0.5) * 2;
-    float r = fract(
-        sin(dot(c_i, vec2(82.1632, 74.3824)) * 12.83) * 374.26 +
-        sin(dot(p_i, vec2(22.7549, 52.8241)) * 21.37) * 284.92
-    );
+    vec2 gp = floor(coord / size * 7); // global
+    vec2 rp = floor(fract(coord / size) * 7); // repeated
 
-    float c = max(c2.x, c2.y) * step(0.5, r);
-    c += min(c2.x, c2.y);
-    c *= p_i.x * (6 - p_i.x);
-    c *= p_i.y * (6 - p_i.y);
+    vec2 odd = fract(rp * 0.5) * 2;
+    float rnd = fract(sin(dot(gp, vec2(12.9898, 78.233))) * 43758.5453);
+
+    float c = max(odd.x, odd.y) * step(0.5, rnd); // random lines
+    c += min(odd.x, odd.y); // corder and center points
+
+    c *= rp.x * (6 - rp.x); // cropping
+    c *= rp.y * (6 - rp.y);
+
     return clamp(c, 0, 1);
 }
 

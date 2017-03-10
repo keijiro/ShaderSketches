@@ -41,7 +41,7 @@ float glyph(vec2 coord)
     c *= step(0.15, rand(cp2 * 10)); // space
     c *= step(cp.x, rand(cp2.yy * 10) * 10 + 10); // line end
 
-    float flicker = sin(time * 130 + coord.y * 0.4) * 20 + 0.5;
+    float flicker = sin(time * 100 + coord.y * 3.1416 * 0.3) * 20 + 0.5;
     c = clamp(clamp(c, 0, 1) * flicker, 0, 1);
 
     return c;

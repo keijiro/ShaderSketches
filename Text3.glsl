@@ -16,7 +16,7 @@ float glyph(vec2 coord)
     float size = resolution.x / chars;
 
     // time
-    float gt = time * 2.5; // global
+    float gt = time * 3.5; // global
     float ct = floor(gt); // coarse
     float rt = fract(gt); // repeated
 
@@ -37,7 +37,7 @@ float glyph(vec2 coord)
     c *= rp.x * (6 - rp.x); // cropping
     c *= rp.y * (6 - rp.y);
 
-    c *= max(step(1.1, cp.y), step(cp.x, chars * rt)); // 1st line anim
+    c *= max(step(1, cp.y), step(cp.x, chars * rt)); // 1st line anim
     c *= step(0.15, rand(cp2 * 10)); // space
     c *= step(cp.x, rand(cp2.yy * 10) * 10 + 10); // line end
 

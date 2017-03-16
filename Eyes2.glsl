@@ -10,11 +10,17 @@ float rand(vec2 uv)
     return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-float eyes(vec2 coord)
+vec3 hue2rgb(float h)
+{
+    h = fract(h) * 6 - 2;
+    return clamp(vec3(abs(h - 1) - 1, 2 - abs(h), 2 - abs(h - 2)), 0, 1);
+}
+
+vec3 eyes(vec2 coord)
 {
     const float pi = 3.141592;
     float t = 0.4 * time; 
-    float div = 5 - cos(t * 0.25 * pi) * 4;
+    float div = 5 - cos(t * 0.33 * pi) * 4;
     float sc = resolution.y / div;
 
     vec2 p = (coord - resolution / 2) / sc - 0.5;
@@ -32,11 +38,12 @@ float eyes(vec2 coord)
 
     // grid lines
     vec2 gr = (abs(0.5 - fract(p + 0.5)) - 0.05) * sc;
+    c = clamp(min(min(c, gr.x), gr.y), 0, 1);
 
-    return min(min(c, gr.x), gr.y);
+    return hue2rgb(rand(floor(p) * 0.3231)) * c;
 }
 
 void main(void)
 {
-    fragColor = vec4(eyes(gl_FragCoord.xy));
+    fragColor = vec4(eyes(gl_FragCoord.xy), 1);
 }

@@ -9,7 +9,7 @@ every day. You can see GIFs of these sketches from [my Tumblr].
 ![gif](https://media.giphy.com/media/l1BgRWXnktdmA9xew/giphy.gif)
 ![gif](https://media.giphy.com/media/3og0IUsDqjpRQwePTi/giphy.gif)
 
-I'm using [KodeLife] shader editor and [GPD Win] handhel PC for sketching. In my
+I'm using [KodeLife] shader editor and [GPD Win] handheld PC for sketching. In my
 opinion, this is the best combination of portable development. I created all
 these sketches while standing in a train.
 

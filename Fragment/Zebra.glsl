@@ -27,7 +27,7 @@ void main(void)
     float gr = fract(p3.y * rep + time * 0.8); // repeating gradient
 
     // make antialiased line by saturating the gradient
-    float c = clamp((0.25 - abs(0.5 - gr)) * size * 0.5 / rep, 0, 1);
+    float c = clamp((0.25 - abs(0.5 - gr)) * size * 0.75 / rep, 0, 1);
     c *= max(0, 1 - length(p2) * 0.6); // darken corners
 
     vec2 bd = (0.5 - abs(p2)) * size - 2; // border lines

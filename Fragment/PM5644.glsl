@@ -28,12 +28,13 @@ void main(void)
 
     vec3 rgb = vec3(c);
 
+    // grid lines inside the circle
+//    grid = step(2, fract(p1 - vec2(0, 0.5)) / 13.5 * resolution.y);
+    rgb = mix(rgb, vec3(2 - grid.x - grid.y), mask * step(0, p3.y));
+
     // primitive color bar
     vec3 pcbar = step(0.4999, fract(vec3(0.25, 0.125, 0.5) * (8.5 - p1.x) * 0.5));
-    float pcbar_mask = mask * step(1, p3.y) * step(0, 2 - p3.y);
-
-    rgb = mix(rgb, vec3(1), mask);
-    rgb = mix(rgb, pcbar, pcbar_mask);
+    rgb = mix(rgb, pcbar, mask * step(1, p3.y));
 
     fragColor = vec4(rgb, 1);
 }

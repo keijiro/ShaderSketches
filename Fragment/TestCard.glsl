@@ -14,45 +14,39 @@ vec3 hue2rgb(float h)
 
 void main(void)
 {
-    float scale = 27.0 / resolution.y;
+    float scale = 27.0 / resolution.y;                             // pixel to grid scale
+    vec2 area = vec2(floor(13 / resolution.y * resolution.x), 13); // size of inner area
 
-    vec2 p0 = gl_FragCoord.xy - resolution * 0.5;
-    vec2 p1 = p0 * scale;
+    vec2 p0 = gl_FragCoord.xy - resolution / 2; // position (pixel)
+    vec2 p1 = p0 * scale;                       // position (grid)
 
     // gray background with center cross
-    float gs = 1 - step(2, min(abs(p0.x), abs(p0.y))) * 0.5;
+    float c1 = 1 - step(2, min(abs(p0.x), abs(p0.y))) * 0.5;
 
-    // grid lines (2 pixel width)
+    // grid lines
     vec2 grid = step(scale, abs(0.5 - fract(p1 * 0.5)));
-    gs += 2 - grid.x - grid.y;
+    c1 = saturate(c1 + 2 - grid.x - grid.y);
 
     // castellation
-    vec2 checker_v = step(0.49999, fract(floor(p1 * 0.5 + 0.5) * 0.5));
-    vec2 over = step(vec2(23, 13), abs(p1));
-    gs = mix(gs, abs(checker_v.x - checker_v.y), max(over.x, over.y));
+    vec2 checker = step(0.49999, fract(floor(p1 * 0.5 + 0.5) * 0.5));
+    if (any(greaterThan(abs(p1), area))) c1 = abs(checker.x - checker.y);
 
-    // corner circles
-    float corner = clamp(2 - abs(sqrt(8) - length(abs(p1) - vec2(19, 9))) / scale, 0, 1);
-    gs = mix(gs, 1, corner);
+    float corner = sqrt(8) - length(abs(p1) - area + 4); // small corner circles
+    float circle = 12 - length(p1);                      // big center circle
+    float mask = saturate(circle / scale);               // mask for center circle
 
-    vec3 rgb = vec3(gs);
+    // grayscale bars
+    float bar1 = saturate(p1.y < 5 ? floor(p1.x / 4 + 3) / 5 : p1.x / 16 + 0.5);
+    c1 = mix(c1, bar1, mask * saturate(ceil(4 - abs(5 - p1.y))));
 
-    // antialiased mask for big circle (radius = 6)
-    float mask = 1 - clamp((length(p1) - 12) / scale / 2, 0, 1);
+    vec3 c2 = vec3(c1);
 
-    // grayscale bar
-    float gsbar = floor(p1.x / 4 + 3) / 5;
-    gsbar = mix(gsbar, clamp(p1.x / 16 + 0.5, 0, 1), step(5, p1.y));
-    rgb = mix(rgb, vec3(gsbar), mask * step(1, p1.y) * step(-9, -p1.y));
+    // basic color bars
+    vec3 bar2 = hue2rgb((p1.y > -5 ? floor(p1.x / 4) / 6 : p1.x / 16) + 0.5);
+    c2 = mix(c2, bar2, mask * saturate(ceil(4 - abs(-5 - p1.y))));
 
-    // primitive color bar
-    vec3 pcbar = step(0.4999, fract(vec3(0.25, 0.125, 0.5) * (16 - p1.x) * 0.25));
-    pcbar = mix(pcbar, hue2rgb(p1.x / 16 + 0.5), step(5, -p1.y));
-    rgb = mix(rgb, pcbar, mask * step(1, -p1.y) * step(-9, p1.y));
+    // big circle line
+    c2 = mix(c2, vec3(1), saturate(2 - abs(max(circle, corner)) / scale));
 
-    // big center circle
-    float circle = saturate(4 - abs(12 - length(p1)) / scale);
-    rgb = mix(rgb, vec3(1), circle);
-
-    fragColor = vec4(rgb, 1);
+    fragColor = vec4(c2, 1);
 }

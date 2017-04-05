@@ -15,7 +15,7 @@ void main(void)
     float scale = resolution.y / 5;
 
     vec2 p = gl_FragCoord.xy / scale;
-    float t = time * 0.4 + rand(floor(p)) * 200;
+    float t = time * 0.6 + rand(floor(p)) * 200;
     
     float s2 = 1.6 + 0.6 * sin(t);
     p = (fract(p) - 0.5) * s2; // repeat and scale

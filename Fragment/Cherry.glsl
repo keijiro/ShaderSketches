@@ -17,7 +17,9 @@ void main(void)
     vec2 p = gl_FragCoord.xy / scale;
     float t = time * 0.4 + rand(floor(p)) * 200;
     
-    p = (fract(p) - 0.5) * (1.6 + 0.6 * sin(t)); // repeat and scale
+    float s2 = 1.6 + 0.6 * sin(t);
+    p = (fract(p) - 0.5) * s2; // repeat and scale
+    scale /= s2;
 
     float d1 = 1e6; // distance field (petal)
     float d2 = 0;   // distance field (cut)

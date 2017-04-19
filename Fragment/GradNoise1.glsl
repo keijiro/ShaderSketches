@@ -4,7 +4,6 @@ uniform vec2 resolution;
 uniform float time;
 out vec4 fragColor;
 
-// float fade(float x) { return x * x * (3 - x * 2); }
 float fade(float x) { return x * x * x * (x * (x * 6 - 15) + 10); }
 
 float phash(float p)
@@ -25,7 +24,7 @@ float noise(float p)
 
 void main(void)
 {
-    float p = gl_FragCoord.x * 40 / resolution.x;
-    p += time * 10 - 20;
+    float p = gl_FragCoord.x * 10 / resolution.x;
+    p += time * 2 - 10;
     fragColor = vec4(noise(p) / 2 + 0.5);
 }

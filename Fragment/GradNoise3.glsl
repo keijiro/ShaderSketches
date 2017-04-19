@@ -4,7 +4,6 @@ uniform vec2 resolution;
 uniform float time;
 out vec4 fragColor;
 
-// vec3 fade(vec3 x) { return x * x * (3 - x * 2); }
 vec3 fade(vec3 x) { return x * x * x * (x * (x * 6 - 15) + 10); }
 
 vec3 phash(vec3 p)

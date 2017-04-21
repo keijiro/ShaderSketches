@@ -24,6 +24,12 @@ float rand(vec2 uv)
     return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
+vec3 hue2rgb(float h)
+{
+    h = fract(h) * 6 - 2;
+    return saturate(vec3(abs(h - 1) - 1, 2 - abs(h), 2 - abs(h - 2)));
+}
+
 vec2 fade(vec2 x) { return x * x * x * (x * (x * 6 - 15) + 10); }
 vec3 fade(vec3 x) { return x * x * x * (x * (x * 6 - 15) + 10); }
 
@@ -76,6 +82,6 @@ void main(void)
 {
     vec2 p = gl_FragCoord.xy * 10 / resolution.y;
     float c = noise(vec3(p, time)) + 0.5;
-    vec3 rgb = vec3(c);
+    vec3 rgb = hue2rgb(c);
     fragColor = vec4(rgb, 1);
 }

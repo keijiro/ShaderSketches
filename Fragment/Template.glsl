@@ -109,14 +109,30 @@ vec2 frag2polar(vec2 coord)
     return vec2(atan(p.y, p.x) / PI / 2 + 1, length(p));
 }
 
-vec3 frag2hex(vec2 coord)
+vec2 frag2hex(vec2 coord)
 {
-    vec2 p = (coord - resolution / 2) / resolution.y * 2;
-    float seg = floor(fract(atan(p.y, p.x) / PI / 2 + 0.5 / 6) * 6) / 6;
-    vec2 v1 = sincos(seg * PI * 2).yx;
+    vec2 p = (coord - resolution / 2) / resolution.y;
+    float seg = floor(fract(atan(p.y, p.x) / PI / 2 + 0.5 / 6) * 6);
+    vec2 v1 = sincos(seg / 6 * PI * 2).yx;
     vec2 v2 = vec2(-v1.y, v1.x);
-    return vec3(dot(p, v2), dot(p, v1), seg);
+    return vec2(dot(p, v2) + 0.5 + seg, dot(p, v1));
 }
+
+/*
+    vec2 p = frag2uv(coord) * vec2(4, 4);
+    vec2 pc = floor(p);
+    vec2 pf = fract(p);
+
+    float t = time * 2;
+    float tc = floor(t);
+    float tf = fract(t);
+
+    vec3 c = C1.xxx;
+
+    c = C1.yyy * cnoise(vec3(p, t)) * (1 - tf);
+
+    return saturate(c);
+*/
 
 /*
  ____  __.         .___     .____    .__  _____        ____  ___  ____ ___      .__  __                                                 
@@ -135,42 +151,70 @@ vec3 frag2hex(vec2 coord)
 
 vec3 fx1(vec2 coord)
 {
-    vec2 p = frag2uv(coord);
+    vec2 p = frag2uv(coord) * vec2(2, 5);
+    vec2 pc = floor(p);
+    vec2 pf = fract(p);
+
+    float t = time * 2;
+    float tc = floor(t);
+    float tf = fract(t);
+
     vec3 c = C1.xxx;
 
-    c.rg = fract(p + time);
+    c = C1.yyy * dot(saturate(pf.xy - tf), C1.zz);
 
-    return c;
+    return saturate(c);
 }
 
 vec3 fx2(vec2 coord)
 {
-    vec2 p = frag2polar(coord);
+    vec2 p = frag2polar(coord) * vec2(8, 5);
+    vec2 pc = floor(p);
+    vec2 pf = fract(p);
+
+    float t = time * 2;
+    float tc = floor(t);
+    float tf = fract(t);
+
     vec3 c = C1.xxx;
 
-    c.gb = fract(p - time);
+    c = C1.yyy * dot(saturate(pf.xy - tf), C1.zz);
 
-    return c;
+    return saturate(c);
 }
 
 vec3 fx3(vec2 coord)
 {
-    vec3 p = frag2hex(coord);
+    vec2 p = frag2hex(coord) * vec2(1, 20);
+    vec2 pc = floor(p);
+    vec2 pf = fract(p);
+
+    float t = time * 2;
+    float tc = floor(t);
+    float tf = fract(t);
+
     vec3 c = C1.xxx;
 
-    c = fract(p - time);
+    c = hue2rgb(pc.x * 0.03) * pf.x * fract(pf.y - tf);
 
-    return c;
+    return saturate(c);
 }
 
 vec3 fx4(vec2 coord)
 {
-    vec2 p = frag2uv(coord);
+    vec2 p = frag2uv(coord) * vec2(4, 4);
+    vec2 pc = floor(p);
+    vec2 pf = fract(p);
+
+    float t = time * 2;
+    float tc = floor(t);
+    float tf = fract(t);
+
     vec3 c = C1.xxx;
 
-    c = C1.yyy * rand(p + time);
+    c = C1.yyy * cnoise(vec3(p, t)) * (1 - tf);
 
-    return c;
+    return saturate(c);
 }
 
 void main(void)
@@ -193,7 +237,7 @@ void main(void)
     #undef NOAA
     #undef SSAA
 
-    #if 1
+    #if 0
 
     vec3 acc = max(max(max(c1, c2), c3), c4);
 

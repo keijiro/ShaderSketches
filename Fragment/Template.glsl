@@ -12,8 +12,8 @@ uniform sampler2D prevFrame;
 
 out vec4 fragColor;
 
-const float pi = 3.14159265359;
-const vec4 qr = vec4(0, 1, 0.5, -1);
+const float PI = 3.14159265359;
+const vec4 C1 = vec4(0, 1, 0.5, -1);
 
 float saturate(float x) { return clamp(x, 0, 1); }
 vec2  saturate(vec2 x)  { return clamp(x, 0, 1); }
@@ -98,79 +98,114 @@ float cnoise(vec3 p)
                mix(mix(d100, d101, fp.z), mix(d110, d111, fp.z), fp.y), fp.x);
 }
 
-vec2 ScreenCoord01(vec2 coord)
+vec2 frag2uv(vec2 coord)
 {
     return (coord - resolution / 2) / resolution.y * 2 - 1;
 }
 
-vec2 PolarCoord(vec2 coord)
+vec2 frag2polar(vec2 coord)
 {
     vec2 p = (coord - resolution / 2) / resolution.y * 2;
-    return vec2(atan(p.y, p.x) / pi / 2 + 1, length(p));
+    return vec2(atan(p.y, p.x) / PI / 2 + 1, length(p));
 }
 
-vec3 HexCoord(vec2 coord)
+vec3 frag2hex(vec2 coord)
 {
     vec2 p = (coord - resolution / 2) / resolution.y * 2;
-    float seg = floor(fract(atan(p.y, p.x) / pi / 2 + 0.5 / 6) * 6) / 6;
-    vec2 v1 = sincos(seg * pi * 2).yx;
+    float seg = floor(fract(atan(p.y, p.x) / PI / 2 + 0.5 / 6) * 6) / 6;
+    vec2 v1 = sincos(seg * PI * 2).yx;
     vec2 v2 = vec2(-v1.y, v1.x);
     return vec3(dot(p, v2), dot(p, v1), seg);
 }
 
-//
-//  ____  __.         .___     .____    .__  _____       
-// |    |/ _|____   __| _/____ |    |   |__|/ ____\____  
-// |      < /  _ \ / __ |/ __ \|    |   |  \   __\/ __ \ 
-// |    |  (  <_> ) /_/ \  ___/|    |___|  ||  | \  ___/ 
-// |____|__ \____/\____ |\___  >_______ \__||__|  \___  >
-//         \/          \/    \/        \/             \/ 
-//
+/*
+ ____  __.         .___     .____    .__  _____        ____  ___  ____ ___      .__  __                                                 
+|    |/ _|____   __| _/____ |    |   |__|/ ____\____   \   \/  / |    |   \____ |__|/  |_ ___.__.                                       
+|      < /  _ \ / __ |/ __ \|    |   |  \   __\/ __ \   \     /  |    |   /    \|  \   __<   |  |                                       
+|    |  (  <_> ) /_/ \  ___/|    |___|  ||  | \  ___/   /     \  |    |  /   |  \  ||  |  \___  |                                       
+|____|__ \____/\____ |\___  >_______ \__||__|  \___  > /___/\  \ |______/|___|  /__||__|  / ____|                                       
+        \/          \/    \/        \/             \/        \_/              \/          \/                                            
+.____    .__             _________            .___.__              ___________                           .__                            
+|    |   |__|__  __ ____ \_   ___ \  ____   __| _/|__| ____    ____\_   _____/__  _________   ___________|__| ____   ____   ____  ____  
+|    |   |  \  \/ // __ \/    \  \/ /  _ \ / __ | |  |/    \  / ___\|    __)_\  \/  /\____ \_/ __ \_  __ \  |/ __ \ /    \_/ ___\/ __ \ 
+|    |___|  |\   /\  ___/\     \___(  <_> ) /_/ | |  |   |  \/ /_/  >        \>    < |  |_> >  ___/|  | \/  \  ___/|   |  \  \__\  ___/ 
+|_______ \__| \_/  \___  >\______  /\____/\____ | |__|___|  /\___  /_______  /__/\_ \|   __/ \___  >__|  |__|\___  >___|  /\___  >___  >
+        \/             \/        \/            \/         \//_____/        \/      \/|__|        \/              \/     \/     \/    \/ 
+*/
 
-vec3 effect1(vec2 coord)
+vec3 fx1(vec2 coord)
 {
-    vec3 rgb = vec3(0);
-    rgb.rg = fract(ScreenCoord01(coord) + time);
-    return rgb / 4;
+    vec2 p = frag2uv(coord);
+    vec3 c = C1.xxx;
+
+    c.rg = fract(p + time);
+
+    return c;
 }
 
-vec3 effect2(vec2 coord)
+vec3 fx2(vec2 coord)
 {
-    vec3 rgb = vec3(0);
-    rgb.gb = PolarCoord(coord);
-    return rgb/ 4;
+    vec2 p = frag2polar(coord);
+    vec3 c = C1.xxx;
+
+    c.gb = fract(p - time);
+
+    return c;
 }
 
-vec3 effect3(vec2 coord)
+vec3 fx3(vec2 coord)
 {
-    vec3 rgb = vec3(0);
-    rgb = fract(HexCoord(coord) + time);
-    return rgb / 4;
+    vec3 p = frag2hex(coord);
+    vec3 c = C1.xxx;
+
+    c = fract(p - time);
+
+    return c;
 }
 
-vec3 effect4(vec2 coord)
+vec3 fx4(vec2 coord)
 {
-    vec3 rgb = vec3(0);
-    return rgb;
+    vec2 p = frag2uv(coord);
+    vec3 c = C1.xxx;
+
+    c = C1.yyy * rand(p + time);
+
+    return c;
 }
 
 void main(void)
 {
     vec2 p0 = gl_FragCoord.xy;
-    vec2 p1 = p0 + vec2(-3, -1) / 8;
-    vec2 p2 = p0 + vec2(+1, -3) / 8;
-    vec2 p3 = p0 + vec2(+3, +1) / 8;
-    vec2 p4 = p0 + vec2(-1, +3) / 8;
+
+    vec2 p1 = p0 + C1.ww / 4;
+    vec2 p2 = p0 + C1.yw / 4;
+    vec2 p3 = p0 + C1.yy / 4;
+    vec2 p4 = p0 + C1.wy / 4;
 
     #define NOAA(func) (func(p0))
     #define SSAA(func) ((func(p1)+func(p2)+func(p3)+func(p4))/4)
 
-    vec3 acc = qr.xxx;
+    vec3 c1 = NOAA(fx1);
+    vec3 c2 = NOAA(fx2);
+    vec3 c3 = NOAA(fx3);
+    vec3 c4 = NOAA(fx4);
 
-    acc += NOAA(effect1);
-    acc += NOAA(effect2);
-    acc += NOAA(effect3);
-    acc += NOAA(effect4);
+    #undef NOAA
+    #undef SSAA
+
+    #if 1
+
+    vec3 acc = max(max(max(c1, c2), c3), c4);
+
+    #else
+
+    float bp = fract(time) * 4;
+    vec3 acc = mix(c1, c2, saturate(bp));
+    acc = mix(acc, c3, saturate(bp - 1));
+    acc = mix(acc, c4, saturate(bp - 2));
+    acc = mix(acc, c1, saturate(bp - 3));
+
+    #endif
 
     fragColor = vec4(acc, 1);
 }

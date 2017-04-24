@@ -27,7 +27,7 @@ vec3 max4(vec3 a, vec3 b, vec3 c, vec3 d)
 
 vec3 mix4(vec3 a, vec3 b, vec3 c, vec3 d, float t)
 {
-    float bp = fract(t / 4) * 4;
+    t = fract(t / 4) * 4;
     vec3 acc = mix(a, b, saturate(t));
     acc = mix(acc, c, saturate(t - 1));
     acc = mix(acc, d, saturate(t - 2));
@@ -115,7 +115,7 @@ float cnoise(vec3 p)
 
 vec3 metro(float bpm)
 {
-    float t = time * bpm / 240;
+    float t = time * bpm  / 60;
     return vec3(t, fract(t), floor(t));
 }
 
@@ -164,6 +164,18 @@ void main(void)
 {
     fragColor = vec4(render(), 1);
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -20,6 +20,21 @@ vec2  saturate(vec2 x)  { return clamp(x, 0, 1); }
 vec3  saturate(vec3 x)  { return clamp(x, 0, 1); }
 vec4  saturate(vec4 x)  { return clamp(x, 0, 1); }
 
+vec3 max4(vec3 a, vec3 b, vec3 c, vec3 d)
+{
+    return max(max(max(a, b), c), d);
+}
+
+vec3 mix4(vec3 a, vec3 b, vec3 c, vec3 d, float t)
+{
+    float bp = fract(t / 4) * 4;
+    vec3 acc = mix(a, b, saturate(t));
+    acc = mix(acc, c, saturate(t - 1));
+    acc = mix(acc, d, saturate(t - 2));
+    acc = mix(acc, a, saturate(t - 3));
+    return acc;
+}
+
 vec2 sincos(float x) { return vec2(sin(x), cos(x)); }
 
 float rand(vec2 uv)
@@ -98,41 +113,113 @@ float cnoise(vec3 p)
                mix(mix(d100, d101, fp.z), mix(d110, d111, fp.z), fp.y), fp.x);
 }
 
-vec2 frag2uv(vec2 coord)
+vec3 metro(float bpm)
 {
-    return (coord - resolution / 2) / resolution.y * 2;
+    float t = time * bpm / 240;
+    return vec3(t, fract(t), floor(t));
 }
 
-vec2 frag2polar(vec2 coord)
+vec3 feedback(vec2 offs)
 {
-    vec2 p = (coord - resolution / 2) / resolution.y * 2;
-    return vec2(atan(p.y, p.x) / PI / 2 + 1, length(p));
+    vec2 uv = gl_FragCoord.xy / resolution;
+    offs.x *= resolution.x / resolution.y;
+    return texture(prevFrame, uv + offs).rgb;
 }
 
-vec2 frag2hex(vec2 coord)
+vec4 uvcoord(float rep_x, float rep_y, float offs_x, float offs_y)
 {
-    vec2 p = (coord - resolution / 2) / resolution.y;
+    vec2 p = (gl_FragCoord.xy / resolution + vec2(offs_x, offs_y)) * vec2(rep_x, rep_y);
+    return vec4(fract(p.xy), floor(p.xy));
+}
+
+vec4 rectcoord(float rep_x, float rep_y, float offs_x, float offs_y)
+{
+    vec2 p = (gl_FragCoord.xy - resolution / 2) / resolution.y * 2;
+    p = (p + vec2(offs_x, offs_y)) * vec2(rep_x, rep_y);
+    return vec4(fract(p.xy), floor(p.xy));
+}
+
+vec4 polarcoord(float rep_x, float rep_y, float offs_x, float offs_y)
+{
+    vec2 p = (gl_FragCoord.xy - resolution / 2) / resolution.y;
+    p = vec2(atan(p.y, p.x) / PI / 2 + 0.5, length(p));
+    p = (p + vec2(offs_x, offs_y)) * vec2(rep_x, rep_y);
+    return vec4(fract(p.xy), floor(p.xy));
+}
+
+vec4 hexcoord(float rep_x, float rep_y, float offs_x, float offs_y)
+{
+    vec2 p = (gl_FragCoord.xy - resolution / 2) / resolution.y;
     float seg = floor(fract(atan(p.y, p.x) / PI / 2 + 0.5 / 6) * 6);
     vec2 v1 = sincos(seg / 6 * PI * 2).yx;
     vec2 v2 = vec2(-v1.y, v1.x);
-    return vec2(dot(p, v2) + 0.5 + seg, dot(p, v1));
+    p = vec2(dot(p, v2) + 0.5, dot(p, v1));
+    p = (p + vec2(offs_x, offs_y)) * vec2(rep_x, rep_y);
+    return vec4(fract(p.xy), floor(p.xy));
 }
 
-/*
-    vec2 p = frag2uv(coord) * vec2(4, 4);
-    vec2 pc = floor(p);
-    vec2 pf = fract(p);
+vec3 render();
 
-    float t = time * 2;
-    float tc = floor(t);
-    float tf = fract(t);
+void main(void)
+{
+    fragColor = vec4(render(), 1);
+}
 
-    vec3 c = C1.xxx;
 
-    c = C1.yyy * 0;
 
-    return saturate(c);
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+vec3 render()
+{
+    return spectrum.xxx;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
  ____  __.         .___     .____    .__  _____        ____  ___  ____ ___      .__  __                                                 
@@ -141,115 +228,24 @@ vec2 frag2hex(vec2 coord)
 |    |  (  <_> ) /_/ \  ___/|    |___|  ||  | \  ___/   /     \  |    |  /   |  \  ||  |  \___  |                                       
 |____|__ \____/\____ |\___  >_______ \__||__|  \___  > /___/\  \ |______/|___|  /__||__|  / ____|                                       
         \/          \/    \/        \/             \/        \_/              \/          \/                                            
-.____    .__             _________            .___.__              ___________                           .__                            
-|    |   |__|__  __ ____ \_   ___ \  ____   __| _/|__| ____    ____\_   _____/__  _________   ___________|__| ____   ____   ____  ____  
-|    |   |  \  \/ // __ \/    \  \/ /  _ \ / __ | |  |/    \  / ___\|    __)_\  \/  /\____ \_/ __ \_  __ \  |/ __ \ /    \_/ ___\/ __ \ 
-|    |___|  |\   /\  ___/\     \___(  <_> ) /_/ | |  |   |  \/ /_/  >        \>    < |  |_> >  ___/|  | \/  \  ___/|   |  \  \__\  ___/ 
-|_______ \__| \_/  \___  >\______  /\____/\____ | |__|___|  /\___  /_______  /__/\_ \|   __/ \___  >__|  |__|\___  >___|  /\___  >___  >
-        \/             \/        \/            \/         \//_____/        \/      \/|__|        \/              \/     \/     \/    \/ 
 */
 
-vec3 fx1(vec2 coord)
-{
-    vec2 p = frag2uv(coord) * vec2(4, 4);
-    vec2 pc = floor(p);
-    vec2 pf = fract(p);
 
-    float t = time * 2;
-    float tc = floor(t);
-    float tf = fract(t);
 
-    vec3 c = C1.xxx;
 
-    c = C1.yyy * spectrum.x;
 
-    return saturate(c);
-}
 
-vec3 fx2(vec2 coord)
-{
-    vec2 p = frag2uv(coord) * vec2(4, 4);
-    vec2 pc = floor(p);
-    vec2 pf = fract(p);
 
-    float t = time * 2;
-    float tc = floor(t);
-    float tf = fract(t);
 
-    vec3 c = C1.xxx;
 
-    c = C1.yyy * 0;
 
-    return saturate(c);
-}
 
-vec3 fx3(vec2 coord)
-{
-    vec2 p = frag2uv(coord) * vec2(4, 4);
-    vec2 pc = floor(p);
-    vec2 pf = fract(p);
 
-    float t = time * 2;
-    float tc = floor(t);
-    float tf = fract(t);
 
-    vec3 c = C1.xxx;
 
-    c = C1.yyy * 0;
 
-    return saturate(c);
-}
 
-vec3 fx4(vec2 coord)
-{
-    vec2 p = frag2uv(coord) * vec2(4, 4);
-    vec2 pc = floor(p);
-    vec2 pf = fract(p);
 
-    float t = time * 2;
-    float tc = floor(t);
-    float tf = fract(t);
 
-    vec3 c = C1.xxx;
 
-    c = C1.yyy * 0;
 
-    return saturate(c);
-}
-
-void main(void)
-{
-    vec2 p0 = gl_FragCoord.xy;
-
-    vec2 p1 = p0 + C1.ww / 4;
-    vec2 p2 = p0 + C1.yw / 4;
-    vec2 p3 = p0 + C1.yy / 4;
-    vec2 p4 = p0 + C1.wy / 4;
-
-    #define NOAA(func) (func(p0))
-    #define SSAA(func) ((func(p1)+func(p2)+func(p3)+func(p4))/4)
-
-    vec3 c1 = NOAA(fx1);
-    vec3 c2 = NOAA(fx2);
-    vec3 c3 = NOAA(fx3);
-    vec3 c4 = NOAA(fx4);
-
-    #undef NOAA
-    #undef SSAA
-
-    #if 1
-
-    vec3 acc = max(max(max(c1, c2), c3), c4);
-
-    #else
-
-    float bp = fract(time) * 4;
-    vec3 acc = mix(c1, c2, saturate(bp));
-    acc = mix(acc, c3, saturate(bp - 1));
-    acc = mix(acc, c4, saturate(bp - 2));
-    acc = mix(acc, c1, saturate(bp - 3));
-
-    #endif
-
-    fragColor = vec4(acc, 1);
-}

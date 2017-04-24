@@ -100,7 +100,7 @@ float cnoise(vec3 p)
 
 vec2 frag2uv(vec2 coord)
 {
-    return (coord - resolution / 2) / resolution.y * 2 - 1;
+    return (coord - resolution / 2) / resolution.y * 2;
 }
 
 vec2 frag2polar(vec2 coord)
@@ -129,7 +129,7 @@ vec2 frag2hex(vec2 coord)
 
     vec3 c = C1.xxx;
 
-    c = C1.yyy * cnoise(vec3(p, t)) * (1 - tf);
+    c = C1.yyy * 0;
 
     return saturate(c);
 */
@@ -151,7 +151,7 @@ vec2 frag2hex(vec2 coord)
 
 vec3 fx1(vec2 coord)
 {
-    vec2 p = frag2uv(coord) * vec2(2, 5);
+    vec2 p = frag2uv(coord) * vec2(4, 4);
     vec2 pc = floor(p);
     vec2 pf = fract(p);
 
@@ -161,14 +161,14 @@ vec3 fx1(vec2 coord)
 
     vec3 c = C1.xxx;
 
-    c = C1.yyy * dot(saturate(pf.xy - tf), C1.zz);
+    c = C1.yyy * spectrum.x;
 
     return saturate(c);
 }
 
 vec3 fx2(vec2 coord)
 {
-    vec2 p = frag2polar(coord) * vec2(8, 5);
+    vec2 p = frag2uv(coord) * vec2(4, 4);
     vec2 pc = floor(p);
     vec2 pf = fract(p);
 
@@ -178,14 +178,14 @@ vec3 fx2(vec2 coord)
 
     vec3 c = C1.xxx;
 
-    c = C1.yyy * dot(saturate(pf.xy - tf), C1.zz);
+    c = C1.yyy * 0;
 
     return saturate(c);
 }
 
 vec3 fx3(vec2 coord)
 {
-    vec2 p = frag2hex(coord) * vec2(1, 20);
+    vec2 p = frag2uv(coord) * vec2(4, 4);
     vec2 pc = floor(p);
     vec2 pf = fract(p);
 
@@ -195,7 +195,7 @@ vec3 fx3(vec2 coord)
 
     vec3 c = C1.xxx;
 
-    c = hue2rgb(pc.x * 0.03) * pf.x * fract(pf.y - tf);
+    c = C1.yyy * 0;
 
     return saturate(c);
 }
@@ -212,7 +212,7 @@ vec3 fx4(vec2 coord)
 
     vec3 c = C1.xxx;
 
-    c = C1.yyy * cnoise(vec3(p, t)) * (1 - tf);
+    c = C1.yyy * 0;
 
     return saturate(c);
 }
@@ -237,7 +237,7 @@ void main(void)
     #undef NOAA
     #undef SSAA
 
-    #if 0
+    #if 1
 
     vec3 acc = max(max(max(c1, c2), c3), c4);
 

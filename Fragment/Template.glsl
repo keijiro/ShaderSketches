@@ -37,6 +37,12 @@ vec3 mix4(vec3 a, vec3 b, vec3 c, vec3 d, float t)
 
 vec2 sincos(float x) { return vec2(sin(x), cos(x)); }
 
+mat2 rotate(float x)
+{
+    vec2 sc = sincos(x);
+    return mat2(sc.y, sc.x, -sc.x, sc.y);
+}
+
 float rand(vec2 uv)
 {
     return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
@@ -113,7 +119,7 @@ float cnoise(vec3 p)
                mix(mix(d100, d101, fp.z), mix(d110, d111, fp.z), fp.y), fp.x);
 }
 
-vec3 metro(float bpm)
+vec3 metro(float time, float bpm)
 {
     float t = time * bpm  / 60;
     return vec3(t, fract(t), floor(t));
@@ -126,30 +132,47 @@ vec3 feedback(vec2 offs)
     return texture(prevFrame, uv + offs).rgb;
 }
 
-vec4 uvcoord(float rep_x, float rep_y, float offs_x, float offs_y)
+vec4 uv2rect(vec2 uv, float rep_x, float rep_y, float offs_x, float offs_y)
 {
-    vec2 p = (gl_FragCoord.xy / resolution + vec2(offs_x, offs_y)) * vec2(rep_x, rep_y);
-    return vec4(fract(p.xy), floor(p.xy));
-}
-
-vec4 rectcoord(float rep_x, float rep_y, float offs_x, float offs_y)
-{
-    vec2 p = (gl_FragCoord.xy - resolution / 2) / resolution.y * 2;
+    vec2 p = uv * 2 - 1;
+    p.x *= resolution.x / resolution.y;
     p = (p + vec2(offs_x, offs_y)) * vec2(rep_x, rep_y);
     return vec4(fract(p.xy), floor(p.xy));
 }
 
-vec4 polarcoord(float rep_x, float rep_y, float offs_x, float offs_y)
+vec4 uv2rect(vec2 uv)
 {
-    vec2 p = (gl_FragCoord.xy - resolution / 2) / resolution.y;
+    return uv2rect(uv, 1, 1, 0, 0);
+}
+
+vec4 uv2rect(vec2 uv, float rep_x, float rep_y)
+{
+    return uv2rect(uv, rep_x, rep_y, 0, 0);
+}
+
+vec4 uv2polar(vec2 uv, float rep_x, float rep_y, float offs_x, float offs_y)
+{
+    vec2 p = uv * 2 - 1;
+    p.x *= resolution.x / resolution.y;
     p = vec2(atan(p.y, p.x) / PI / 2 + 0.5, length(p));
     p = (p + vec2(offs_x, offs_y)) * vec2(rep_x, rep_y);
     return vec4(fract(p.xy), floor(p.xy));
 }
 
-vec4 hexcoord(float rep_x, float rep_y, float offs_x, float offs_y)
+vec4 uv2polar(vec2 uv)
 {
-    vec2 p = (gl_FragCoord.xy - resolution / 2) / resolution.y;
+    return uv2polar(uv, 1, 1, 0, 0);
+}
+
+vec4 uv2polar(vec2 uv, float rep_x, float rep_y)
+{
+    return uv2polar(uv, rep_x, rep_y, 0, 0);
+}
+
+vec4 uv2hex(vec2 uv, float rep_x, float rep_y, float offs_x, float offs_y)
+{
+    vec2 p = uv * 2 - 1;
+    p.x *= resolution.x / resolution.y;
     float seg = floor(fract(atan(p.y, p.x) / PI / 2 + 0.5 / 6) * 6);
     vec2 v1 = sincos(seg / 6 * PI * 2).yx;
     vec2 v2 = vec2(-v1.y, v1.x);
@@ -158,11 +181,21 @@ vec4 hexcoord(float rep_x, float rep_y, float offs_x, float offs_y)
     return vec4(fract(p.xy), floor(p.xy));
 }
 
-vec3 render();
+vec4 uv2hex(vec2 uv)
+{
+    return uv2hex(uv, 1, 1, 0, 0);
+}
+
+vec4 uv2hex(vec2 uv, float rep_x, float rep_y)
+{
+    return uv2hex(uv, rep_x, rep_y, 0, 0);
+}
+
+vec3 render(vec2 uv);
 
 void main(void)
 {
-    fragColor = vec4(render(), 1);
+    fragColor = vec4(render(gl_FragCoord.xy / resolution), 1);
 }
 
 
@@ -192,9 +225,9 @@ void main(void)
 
 
 
-vec3 render()
+vec3 render(vec2 uv)
 {
-    return spectrum.xxx;
+    return spectrum.x;
 }
 
 

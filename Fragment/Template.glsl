@@ -125,6 +125,11 @@ vec3 metro(float time, float bpm)
     return vec3(t, fract(t), floor(t));
 }
 
+vec3 sample(sampler2D t, vec2 uv)
+{
+    return texture(t, fract(1 - uv)).rgb;
+}
+
 vec3 feedback(vec2 offs)
 {
     vec2 uv = gl_FragCoord.xy / resolution;
@@ -140,16 +145,6 @@ vec4 uv2rect(vec2 uv, float rep_x, float rep_y, float offs_x, float offs_y)
     return vec4(fract(p.xy), floor(p.xy));
 }
 
-vec4 uv2rect(vec2 uv)
-{
-    return uv2rect(uv, 1, 1, 0, 0);
-}
-
-vec4 uv2rect(vec2 uv, float rep_x, float rep_y)
-{
-    return uv2rect(uv, rep_x, rep_y, 0, 0);
-}
-
 vec4 uv2polar(vec2 uv, float rep_x, float rep_y, float offs_x, float offs_y)
 {
     vec2 p = uv * 2 - 1;
@@ -157,16 +152,6 @@ vec4 uv2polar(vec2 uv, float rep_x, float rep_y, float offs_x, float offs_y)
     p = vec2(atan(p.y, p.x) / PI / 2 + 0.5, length(p));
     p = (p + vec2(offs_x, offs_y)) * vec2(rep_x, rep_y);
     return vec4(fract(p.xy), floor(p.xy));
-}
-
-vec4 uv2polar(vec2 uv)
-{
-    return uv2polar(uv, 1, 1, 0, 0);
-}
-
-vec4 uv2polar(vec2 uv, float rep_x, float rep_y)
-{
-    return uv2polar(uv, rep_x, rep_y, 0, 0);
 }
 
 vec4 uv2hex(vec2 uv, float rep_x, float rep_y, float offs_x, float offs_y)
@@ -179,16 +164,6 @@ vec4 uv2hex(vec2 uv, float rep_x, float rep_y, float offs_x, float offs_y)
     p = vec2(dot(p, v2) + 0.5, dot(p, v1));
     p = (p + vec2(offs_x, offs_y)) * vec2(rep_x, rep_y);
     return vec4(fract(p.xy), floor(p.xy));
-}
-
-vec4 uv2hex(vec2 uv)
-{
-    return uv2hex(uv, 1, 1, 0, 0);
-}
-
-vec4 uv2hex(vec2 uv, float rep_x, float rep_y)
-{
-    return uv2hex(uv, rep_x, rep_y, 0, 0);
 }
 
 vec3 render(vec2 uv);
@@ -224,10 +199,9 @@ void main(void)
 
 
 
-
 vec3 render(vec2 uv)
 {
-    return spectrum.x;
+    return spectrum.xxx;
 }
 
 

@@ -134,36 +134,31 @@ vec3 feedback(vec2 offs)
 {
     vec2 uv = gl_FragCoord.xy / resolution;
     offs.x *= resolution.x / resolution.y;
-    return texture(prevFrame, uv + offs).rgb;
+    return texture(prevFrame, fract(uv + offs)).rgb;
 }
 
-vec4 uv2rect(vec2 uv, float rep_x, float rep_y, float offs_x, float offs_y)
+vec2 uv2rect(vec2 uv)
 {
     vec2 p = uv * 2 - 1;
     p.x *= resolution.x / resolution.y;
-    p = (p + vec2(offs_x, offs_y)) * vec2(rep_x, rep_y);
-    return vec4(fract(p.xy), floor(p.xy));
+    return p;
 }
 
-vec4 uv2polar(vec2 uv, float rep_x, float rep_y, float offs_x, float offs_y)
+vec2 uv2polar(vec2 uv)
 {
     vec2 p = uv * 2 - 1;
     p.x *= resolution.x / resolution.y;
-    p = vec2(atan(p.y, p.x) / PI / 2 + 0.5, length(p));
-    p = (p + vec2(offs_x, offs_y)) * vec2(rep_x, rep_y);
-    return vec4(fract(p.xy), floor(p.xy));
+    return vec2(atan(p.y, p.x) / PI / 2 + 0.5, length(p));
 }
 
-vec4 uv2hex(vec2 uv, float rep_x, float rep_y, float offs_x, float offs_y)
+vec2 uv2hex(vec2 uv)
 {
     vec2 p = uv * 2 - 1;
     p.x *= resolution.x / resolution.y;
     float seg = floor(fract(atan(p.y, p.x) / PI / 2 + 0.5 / 6) * 6);
     vec2 v1 = sincos(seg / 6 * PI * 2).yx;
-    vec2 v2 = vec2(-v1.y, v1.x);
-    p = vec2(dot(p, v2) + 0.5, dot(p, v1));
-    p = (p + vec2(offs_x, offs_y)) * vec2(rep_x, rep_y);
-    return vec4(fract(p.xy), floor(p.xy));
+    vec2 v2 = vec2(-v1.y, v1.x) * 0.86602540378; // sin(60 degs);
+    return vec2(dot(p, v2) / dot(p, v1) + 0.5 + seg, dot(p, v1));
 }
 
 vec3 render(vec2 uv);

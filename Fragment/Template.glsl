@@ -119,12 +119,6 @@ float cnoise(vec3 p)
                mix(mix(d100, d101, fp.z), mix(d110, d111, fp.z), fp.y), fp.x);
 }
 
-vec3 metro(float time, float bpm)
-{
-    float t = time * bpm  / 60;
-    return vec3(t, fract(t), floor(t));
-}
-
 vec3 sample(sampler2D t, vec2 uv)
 {
     return texture(t, fract(1 - uv)).rgb;
@@ -157,8 +151,13 @@ vec2 uv2hex(vec2 uv)
     p.x *= resolution.x / resolution.y;
     float seg = floor(fract(atan(p.y, p.x) / PI / 2 + 0.5 / 6) * 6);
     vec2 v1 = sincos(seg / 6 * PI * 2).yx;
+#if 0
     vec2 v2 = vec2(-v1.y, v1.x) * 0.86602540378; // sin(60 degs);
     return vec2(dot(p, v2) / dot(p, v1) + 0.5 + seg, dot(p, v1));
+#else
+    vec2 v2 = vec2(-v1.y, v1.x);
+    return vec2(dot(p, v2) * 0.5 + 0.5 + seg, dot(p, v1));
+#endif
 }
 
 vec3 render(vec2 uv);
@@ -168,98 +167,12 @@ void main(void)
     fragColor = vec4(render(gl_FragCoord.xy / resolution), 1);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//
+//
+//
 
 vec3 render(vec2 uv)
 {
-    return spectrum.xxx;
+    return C1.yyy * cnoise(uv.x + time);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
- ____  __.         .___     .____    .__  _____        ____  ___  ____ ___      .__  __                                                 
-|    |/ _|____   __| _/____ |    |   |__|/ ____\____   \   \/  / |    |   \____ |__|/  |_ ___.__.                                       
-|      < /  _ \ / __ |/ __ \|    |   |  \   __\/ __ \   \     /  |    |   /    \|  \   __<   |  |                                       
-|    |  (  <_> ) /_/ \  ___/|    |___|  ||  | \  ___/   /     \  |    |  /   |  \  ||  |  \___  |                                       
-|____|__ \____/\____ |\___  >_______ \__||__|  \___  > /___/\  \ |______/|___|  /__||__|  / ____|                                       
-        \/          \/    \/        \/             \/        \_/              \/          \/                                            
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

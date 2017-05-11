@@ -28,7 +28,7 @@ vec3 tri(vec2 uv)
     vec2 p = floor(uv2tri(uv));
     float h = rand(p + 0.1) * 0.2 + time * 0.2;
     float s = sin((rand(p + 0.2) * 3.3 + 1.2) * time) * 0.5 + 0.5;
-    return hue2rgb(h) * s + 0.3;
+    return hue2rgb(h) * s + 0.5;
 }
 
 void main(void)

@@ -38,8 +38,8 @@ void main(void)
     float t1 = time / 2;
     float t2 = t1 + 0.5;
 
-    vec3 c1 = tri(uv * (2 + 4 * fract(t1)) + floor(t1));
-    vec3 c2 = tri(uv * (2 + 4 * fract(t2)) + floor(t2));
+    vec3 c1 = tri(uv * (8 - 4 * fract(t1)) + floor(t1) * 4);
+    vec3 c2 = tri(uv * (8 - 4 * fract(t2)) + floor(t2) * 4 + 2);
 
     fragColor = vec4(mix(c1, c2, abs(1 - 2 * fract(t1))), 1);
 }

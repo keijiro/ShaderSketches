@@ -21,8 +21,11 @@ vec2 uv2tri(vec2 uv)
 
 void main(void)
 {
+    float s = sin(time * 1.2);
+
     vec2 uv = (gl_FragCoord.xy - resolution / 2) / resolution.y;
-    vec2 p = uv2tri(uv * 8);
+    uv.x += uv.y * s * 0.1;
+    vec2 p = uv2tri(uv * (8 + s));
 
     float r1 = rand(floor(p) * 0.011 + 0.345) * PI * 2;
     float r2 = rand(floor(p) * 0.007 + 0.789) * PI * 2;

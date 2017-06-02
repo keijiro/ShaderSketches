@@ -145,6 +145,21 @@ vec2 uv2polar(vec2 uv)
     return vec2(atan(p.y, p.x) / PI / 2 + 0.5, length(p));
 }
 
+vec2 uv2tri(vec2 uv)
+{
+    vec2 p = uv2rect(uv);
+    float sx = p.x - p.y / 2; // skewed x
+    float offs = step(fract(1 - p.y), fract(sx));
+    // distance from borders
+    vec3 tp = vec3(dot(p, vec2(1, 0.5)), dot(p, vec2(-1, 0.5)), p.y);
+    vec3 tp1 = fract(+tp);
+    vec3 tp2 = fract(-tp);
+    float d1 = min(min(tp1.x, tp1.y), tp1.z);
+    float d2 = min(min(tp2.x, tp2.y), tp2.z);
+    float d = min(d1, d2) * 3;
+    return vec2(floor(sx) * 2 + offs, floor(p.y)) + d;
+}
+
 vec2 uv2hex(vec2 uv)
 {
     vec2 p = uv * 2 - 1;

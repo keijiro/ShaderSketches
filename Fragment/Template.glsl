@@ -48,6 +48,11 @@ float rand(vec2 uv)
     return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
+float rand(float x, float y = 0)
+{
+    return rand(vec2(x, y));
+}
+
 vec3 hue2rgb(float h)
 {
     h = fract(h) * 6 - 2;
@@ -188,6 +193,6 @@ void main(void)
 
 vec3 render(vec2 uv)
 {
-    return C1.yyy * cnoise(uv.x + time);
+    return vec3(1) * cnoise(uv.x * 4 + time);
 }
 
